@@ -1,13 +1,13 @@
 {
   "name": "node-jvm",
-  "version": "0.1.4",
+  "version": "0.2.3",
   "description": "jvm",
   "main": "index.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,17 @@
     "virtual",
     "machine"
   ],
+  "dependencies": {
+    "adm-zip": "0.4.3"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-mocha-test": "~0.7.0",
+    "chai": "~1.8.0",
+    "sinon": "~1.7.3",
+    "sinon-chai": "~2.4.0",
+    "grunt-node-webkit-builder": "~0.1.11"
+},
   "author": "Yaroslav Gaponov",
   "license": "MIT",
   "readmeFilename": "readme.md",

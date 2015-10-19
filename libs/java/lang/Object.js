@@ -13,17 +13,22 @@ var Object = module.exports = function() {
     }
 }
 
+Object.getClassName = function() {
+    return "java/lang/Object";
+}
+ 
+
 Object.prototype["<init>"] = function() {
     return this;
 }
 
 Object.prototype["toString"] = function() {
-    return util.format("%s@%s", this.__className, this.hashCode());
+    return this.getClassName() + "@" +  this.hashCode().toString(16);
 }
 
 Object.prototype["hashCode"] = function() {
     if (!this._hashCode) {
-        this._hashCode = Math.floor(Math.random()*65535);
+        this._hashCode = Math.floor(Math.random() * 0xffffffff);
     }
     return this._hashCode;
 }

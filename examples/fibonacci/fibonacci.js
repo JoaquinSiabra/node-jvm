@@ -2,5 +2,9 @@
 
 var JVM = require("../../index");
 var jvm = new JVM();
-jvm.loadClassFile("./Main.class");
-jvm.run([10]);
+jvm.setLogLevel(7);
+jvm.loadClassFiles(__dirname);
+jvm.on("exit", function(code) {
+    process.exit(code);
+});
+jvm.run([15]);

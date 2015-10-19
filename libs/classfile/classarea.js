@@ -30,7 +30,7 @@ ClassArea.prototype.getAccessFlags = function() {
     return this.classImage.access_flags;    
 }
 
-ClassArea.prototype.getPoolConstant = function() {
+ClassArea.prototype.getConstantPool = function() {
     return this.classImage.constant_pool;
 }
 
@@ -40,6 +40,20 @@ ClassArea.prototype.getFields = function() {
 
 ClassArea.prototype.getMethods = function() {
     return this.classImage.methods;
+}
+
+ClassArea.prototype.getClasses = function() {
+    var self = this;
+    var classes = [];
+    this.classImage.attributes.forEach(function(a) {
+        if (a.info.type === ATTRIBUTE_TYPES.InnerClasses) {
+            a.info.classes.forEach(function(c) {
+                classes.push(self.classImage.constant_pool[self.classImage.constant_pool[c.inner_class_info_index].name_index].bytes);
+                classes.push(self.classImage.constant_pool[self.classImage.constant_pool[c.outer_class_info_index].name_index].bytes);
+            });
+        }
+    });
+    return classes;
 }
 
 var getClassImage = function(classBytes) {
@@ -71,7 +85,7 @@ var getClassImage = function(classBytes) {
                 
                 switch(item.bytes) {
                     
-                    case "Code":
+                    case ATTRIBUTE_TYPES.Code:
                         attribute.type = ATTRIBUTE_TYPES.Code;
                         attribute.max_stack = reader.read16();
                         attribute.max_locals = reader.read16();
@@ -98,17 +112,31 @@ var getClassImage = function(classBytes) {
                         }
                         return attribute;
                         
-                    case "SourceFile":
+                    case ATTRIBUTE_TYPES.SourceFile:
                         attribute.type = ATTRIBUTE_TYPES.SourceFile;
                         attribute.sourcefile_index = reader.read16();
                         return attribute;
                     
-                    case "Exceptions":
+                    case ATTRIBUTE_TYPES.Exceptions:
                         attribute.type = ATTRIBUTE_TYPES.Exceptions;
                         var number_of_exceptions = reader.read16();
                         attribute.exception_index_table = [];
                         for(var i=0; i<number_of_exceptions; i++) {
                             attribute.exception_index_table.push(reader.read16());
+                        }
+                        return attribute;
+                    
+                    case ATTRIBUTE_TYPES.InnerClasses:
+                        attribute.type = ATTRIBUTE_TYPES.InnerClasses;
+                        var number_of_classes = reader.read16();
+                        attribute.classes = [];
+                        for(var i=0; i<number_of_classes; i++) {
+                            var inner = {};
+                            inner.inner_class_info_index = reader.read16();
+                            inner.outer_class_info_index = reader.read16();
+                            inner.inner_name_index = reader.read16();
+                            inner.inner_class_access_flags = reader.read16();
+                            attribute.classes.push(inner);
                         }
                         return attribute;
                     
@@ -166,6 +194,15 @@ var getClassImage = function(classBytes) {
             case TAGS.CONSTANT_Integer:
                 var bytes = reader.read32();
                 classImage.constant_pool.push( {  tag: tag, bytes: bytes } );                                                
+                break;
+            case TAGS.CONSTANT_Double:
+            case TAGS.CONSTANT_Long:
+                var bytes = new Buffer(8);
+                for (var b=0; b<8; b++) {
+                    bytes[b] = reader.read8();
+                }
+                classImage.constant_pool.push( {  tag: tag, bytes: bytes } );
+                classImage.constant_pool.push( null ); i++;
                 break;
             case TAGS.CONSTANT_Fieldref:
             case TAGS.CONSTANT_Methodref:

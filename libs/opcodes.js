@@ -3,7 +3,7 @@
  Copyright (c) 2013 Yaroslav Gaponov <yaroslav.gaponov@gmail.com>
 */
 
-var opcodes = module.exports = {
+var OPCODES = module.exports = {
     "nop": 0x00,
     "aconst_null": 0x01,
     "iconst_m1": 0x02,
@@ -129,7 +129,7 @@ var opcodes = module.exports = {
     "ishr": 0x7A,
     "lshr": 0x7B,
     "iushr": 0x7C,
-    "lushr": 0x7B,
+    "lushr": 0x7D,
     "iand": 0x7E,
     "land": 0x7F,
     "ior": 0x80,
@@ -205,19 +205,19 @@ var opcodes = module.exports = {
     "ifnonnull": 0xC7,
     "goto_w": 0xC8,
     "jsr_w": 0xC9,
-    toString: function(opcode) {
-        if (!this._cache) {
+    
+    toString: function(opCode) {
+        if ( !this._cache ) {
             this._cache = new Array(256);
-        }        
-        if (this._cache[opcode]) {
-            return this._cache[opcode];
-        }        
-        for(var op in this) {
-            if (this[op] === opcode) {
-                this._cache[opcode] = op;
-                return op;
+        }
+        if ( this._cache[opCode] ) {
+            return this._cache[opCode]; 
+        }
+        for(var opName in this) {
+            if (this[opName] === opCode) {
+                return this._cache[opCode] = opName;
             }
         }
         return null;
     }
-}
+};
